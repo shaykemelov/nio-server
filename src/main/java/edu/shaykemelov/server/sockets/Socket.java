@@ -8,17 +8,17 @@ public class Socket
 {
 	private final long socketId;
 	private final SocketChannel socketChannel;
-	private final SocketsReader socketsReader;
-	private final SocketsWriter socketsWriter;
+	private final SocketReader socketReader;
+	private final SocketWriter socketWriter;
 
 	private boolean endOfStreamReached;
 
-	public Socket(final long socketId, final SocketChannel socketChannel, final SocketsReader socketsReader, final SocketsWriter socketsWriter)
+	public Socket(final long socketId, final SocketChannel socketChannel, final SocketReader socketReader, final SocketWriter socketWriter)
 	{
 		this.socketId = socketId;
 		this.socketChannel = socketChannel;
-		this.socketsReader = socketsReader;
-		this.socketsWriter = socketsWriter;
+		this.socketReader = socketReader;
+		this.socketWriter = socketWriter;
 		this.endOfStreamReached = false;
 	}
 
@@ -38,13 +38,16 @@ public class Socket
 			endOfStreamReached = true;
 		}
 
-		socketsReader.read(byteBuffer);
+		socketReader.read(byteBuffer);
 
 		return totalBytesRead;
 	}
 
 	public int write(ByteBuffer byteBuffer) throws IOException
 	{
+		socketWriter.write(byteBuffer);
+		byteBuffer.flip();
+
 		int bytesWritten = socketChannel.write(byteBuffer);
 		int totalBytesWritten = bytesWritten;
 

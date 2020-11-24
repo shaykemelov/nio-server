@@ -2,7 +2,7 @@ package edu.shaykemelov.server.sockets;
 
 import java.nio.ByteBuffer;
 
-public interface SocketsReader
+public interface SocketReader
 {
 	void read(ByteBuffer byteBuffer);
 }

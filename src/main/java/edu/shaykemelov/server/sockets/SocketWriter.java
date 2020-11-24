@@ -2,7 +2,7 @@ package edu.shaykemelov.server.sockets;
 
 import java.nio.ByteBuffer;
 
-public interface SocketsWriter
+public interface SocketWriter
 {
 	void write(ByteBuffer byteBuffer);
 }

@@ -21,14 +21,14 @@ public class SocketsProcessor implements Runnable
 
 	private volatile boolean running;
 
-	public SocketsProcessor(Queue<Socket> socketsQueue) throws IOException
+	public SocketsProcessor(final Queue<Socket> socketsQueue, final int readBufferSize, final int writeBufferSize) throws IOException
 	{
 		this.socketsQueue = socketsQueue;
 		this.socketsMap = new HashMap<>();
 		this.readSelector = Selector.open();
 		this.writeSelector = Selector.open();
-		this.readByteBuffer = ByteBuffer.allocate(1024 * 1024);
-		this.writeByteBuffer = ByteBuffer.allocate(1024 * 1024);
+		this.readByteBuffer = ByteBuffer.allocate(readBufferSize);
+		this.writeByteBuffer = ByteBuffer.allocate(writeBufferSize);
 	}
 
 	@Override
@@ -87,17 +87,12 @@ public class SocketsProcessor implements Runnable
 
 			for (final var selectionKey : selectionKeys)
 			{
-				readFromSocket(selectionKey);
+				final var socket = (Socket) selectionKey.attachment();
+				socket.read(readByteBuffer);
 			}
 
 			selectionKeys.clear();
 		}
-	}
-
-	private void readFromSocket(final SelectionKey selectionKey) throws IOException
-	{
-		final var socket = (Socket) selectionKey.attachment();
-		socket.read(readByteBuffer);
 	}
 
 	private void writeToSockets() throws IOException
@@ -109,16 +104,11 @@ public class SocketsProcessor implements Runnable
 			final var selectionKeys = writeSelector.selectedKeys();
 			for (final var selectionKey : selectionKeys)
 			{
-				writeToSocket(selectionKey);
+				final var socket = (Socket) selectionKey.attachment();
+				socket.write(writeByteBuffer);
 			}
 
 			selectionKeys.clear();
 		}
-	}
-
-	protected void writeToSocket(final SelectionKey selectionKey) throws IOException
-	{
-		final var socket = (Socket) selectionKey.attachment();
-		socket.write(writeByteBuffer);
 	}
 }
