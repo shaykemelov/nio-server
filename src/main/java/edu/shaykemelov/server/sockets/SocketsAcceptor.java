@@ -6,6 +6,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.util.Queue;
 
 import edu.shaykemelov.protocols.http.HttpReader;
+import edu.shaykemelov.protocols.http.HttpRequestsProcessor;
 import edu.shaykemelov.protocols.http.HttpWriter;
 
 public class SocketsAcceptor implements Runnable
@@ -39,7 +40,7 @@ public class SocketsAcceptor implements Runnable
 				try
 				{
 					final var socketChannel = serverSocketChannel.accept();
-					final var socket = new Socket(nextSocketId++, socketChannel, new HttpReader(), new HttpWriter());
+					final var socket = new Socket(nextSocketId++, socketChannel, new HttpReader(new HttpRequestsProcessor()), new HttpWriter());
 					socketsQueue.add(socket);
 				}
 				catch (Exception e)

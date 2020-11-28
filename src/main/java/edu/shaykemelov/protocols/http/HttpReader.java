@@ -11,11 +11,14 @@ import edu.shaykemelov.server.sockets.SocketReader;
 
 public class HttpReader implements SocketReader, HasState
 {
+	private final HttpRequestsProcessor httpRequestsProcessor;
+
 	private State currentState;
 	private HttpRequest.Builder builder;
 
-	public HttpReader()
+	public HttpReader(final HttpRequestsProcessor httpRequestsProcessor)
 	{
+		this.httpRequestsProcessor = httpRequestsProcessor;
 		this.currentState = new RequestLineState();
 		this.builder = HttpRequest.builder();
 	}
@@ -38,28 +41,20 @@ public class HttpReader implements SocketReader, HasState
 				if (null == contentLength)
 				{
 					final var httpRequest = builder.build();
-					System.out.println(httpRequest.toString());
-					System.out.println();
+					httpRequestsProcessor.process(httpRequest);
 
 					builder = HttpRequest.builder();
 					setNewState(new RequestLineState());
-				}
-				else
-				{
-					nextState();
+					return;
 				}
 			}
 			else if (currentState instanceof BodyState)
 			{
 				final var httpRequest = builder.build();
-				System.out.println(httpRequest.toString());
-				System.out.println();
-				nextState();
+				httpRequestsProcessor.process(httpRequest);
 			}
-			else
-			{
-				nextState();
-			}
+
+			nextState();
 		}
 
 		while (byteBuffer.hasRemaining())
